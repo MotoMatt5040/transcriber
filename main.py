@@ -21,7 +21,7 @@ for file_name in audio_file_list:
         with open(write_path, "w", encoding='utf-8') as f:
             try:
                 f.write(result['text'])
-            except:
+            except Exception as e:
                 print(f"{file_name}: Failed to write to file")
 
     except Exception as e:
