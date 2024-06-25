@@ -29,7 +29,9 @@ python -m venv venv
 ```
 
 PyTorch can now be installed, browse to https://pytorch.org/get-started/locally/
+
 Here you will select your system options, only use "CUDA" if you have an NVIDIA
+
 Here is the current cpu package
 ```bash
 pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
