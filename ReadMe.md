@@ -46,6 +46,7 @@ Run one of the above commands inside your virtual environment terminal
 Finally, run the following command
 ```bash
 pip install openai-whisper
+pip install -r requirements.txt
 ```
 
 You how have all dependencies installed and can run the following script
