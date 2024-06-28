@@ -1,3 +1,6 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 import os
 import whisper
 
@@ -5,7 +8,7 @@ cwd = os.getcwd()
 audio_path = os.path.join(cwd, "audio")
 audio_file_list = os.listdir(audio_path)
 error_report = []
-file_name = "Q4AOE_0000302814.wav"
+model = whisper.load_model("base")
 
 for file_name in audio_file_list:
     if not file_name.endswith(".wav"):
@@ -14,7 +17,7 @@ for file_name in audio_file_list:
     file_path = os.path.join(audio_path, file_name)
 
     try:
-        model = whisper.load_model("base")
+
         result = model.transcribe(file_path)
         write_path = f"results/{file_name.replace('.wav', '')}.txt"
 
@@ -22,8 +25,7 @@ for file_name in audio_file_list:
             try:
                 f.write(result['text'])
             except Exception as e:
-                print(f"{file_name}: Failed to write to file")
-
+                print(f"{file_name}: Failed to write to file\n    {e}")
     except Exception as e:
         print(f"{file_name}: Failed to load model\n    {e}")
         error_report.append(f"{file_name}: Failed to load model\n    {e}")
