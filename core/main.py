@@ -1,14 +1,17 @@
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 import os
 import whisper
+import time
 
 cwd = os.getcwd()
 audio_path = os.path.join(cwd, "audio")
 audio_file_list = os.listdir(audio_path)
 error_report = []
-model = whisper.load_model("base")
+model = whisper.load_model("medium")
+
+start = time.perf_counter()
 
 for file_name in audio_file_list:
     if not file_name.endswith(".wav"):
@@ -33,3 +36,7 @@ for file_name in audio_file_list:
 if error_report:
     with open("error_report.txt", "w") as f:
         f.write("\n".join(error_report))
+
+end = time.perf_counter()
+
+print(f"Time: {end-start}")
