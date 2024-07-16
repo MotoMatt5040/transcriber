@@ -1,9 +1,45 @@
-# from dotenv import load_dotenv
-# load_dotenv()
+from dotenv import load_dotenv
+load_dotenv()
 
 import os
 import whisper
 import time
+import json
+
+from datetime import date, timedelta
+
+from utils.models import TranscriptionModel, session, active_projects, result
+
+
+transcription_dict = {}
+for project in active_projects:
+    transcription_dict[project.ProjectID] = {}
+    transcription_dict[project.ProjectID]['wav'] = os.listdir(f"P:/{project.ProjectID}PCM")
+# [transcros.listdir(f"P:/{v.ProjectID}PCM"))for v in active_projects]
+
+# print(transcription_dict)
+
+for item in result:
+    if 'Proof' in item.RecStrID:
+        continue
+    if item.Transcription is not None:
+        # print(f'{item.RecStrID} already transcribed')
+        continue
+    if not item.ProjectID:
+        continue
+    if not transcription_dict.get(item.ProjectID):
+        raise(f'Project {item.ProjectID} not found in transcription_dict')
+    if not transcription_dict[item.ProjectID].get('records'):
+        transcription_dict[item.ProjectID]['records'] = []
+    transcription_dict[item.ProjectID]['records'].append(item.RecStrID)
+    # print(f'Transcribing {item.RecStrID}...')
+    # item.Transcription = 'Test'
+
+
+# session.commit()
+print(json.dumps(transcription_dict, indent=4))
+
+quit()
 
 cwd = os.getcwd()
 audio_path = os.path.join(cwd, "audio")
