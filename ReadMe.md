@@ -74,15 +74,14 @@ conda install pytorch torchvision torchaudio cpuonly -c pytorch pyodbc sqlalchem
 ##
 # Custom (If you did not run one of the above commands)
 Install the following dependencies.
-
-### conda:
-```bash
-conda install pyodbc sqlalchemy
-```
-
-### pip:
+## pip:
 ```bash
 pip install pyodbc sqlalchemy python-dotenv openai-whisper
+```
+
+## conda:
+```bash
+conda install pyodbc sqlalchemy
 ```
 ##
 
