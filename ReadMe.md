@@ -72,7 +72,7 @@ OR
 conda install pytorch torchvision torchaudio cpuonly -c pytorch pyodbc sqlalchemy
 ```
 ##
-# Custom
+# Custom (If you did not run one of the above commands)
 If you opted not to run one of the above commands you will need to install the following dependencies.
 
 ### conda:
