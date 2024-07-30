@@ -106,7 +106,7 @@ You can use ```--model``` to specify the model you want to use
 
 Anaconda can be installed by downloading the installer from https://www.anaconda.com/products/individual and running the installer. If you run into issues, you may need to run the installer as an administrator.
 
-If you are using an NVIDIA Graphics card, please install GeForce experience. It is the easiest way to update your drivers if you don't need to get into serious dev.
+If you are using an NVIDIA Graphics card, and it is not a datacenter card, please install GeForce experience. It is the easiest way to update your drivers if you don't need to get into serious dev.
 
 If you are installing on Windows Server 2022 and run into wlanapi.dll is missing, follow the instructions here https://www.nvidia.com/en-us/geforce/forums/geforce-experience/14/347710/can-not-find-wlanapi-dll-file-when-geforec-experie/
 
