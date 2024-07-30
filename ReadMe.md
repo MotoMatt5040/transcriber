@@ -106,18 +106,22 @@ You can use ```--model``` to specify the model you want to use
 
 Anaconda can be installed by downloading the installer from https://www.anaconda.com/products/individual and running the installer. If you run into issues, you may need to run the installer as an administrator.
 
-If you are using an NVIDIA Graphics card, and it is not a datacenter card, please install GeForce experience. It is the easiest way to update your drivers if you don't need to get into serious dev.
+If you are using an NVIDIA GPU that is not a datacenter GPU, and if you don't need to run very intensive tasks, you may install GeForce Experience. This will install the necessary drivers for your GPU. If you are using a datacenter card, you may need to install the drivers manually from https://www.nvidia.com/download/index.aspx. If you need to run more intensive tasks, you may want to opt for the CUDA Toolkit installation instead.
 
 If you are installing on Windows Server 2022 and run into wlanapi.dll is missing, follow the instructions here https://www.nvidia.com/en-us/geforce/forums/geforce-experience/14/347710/can-not-find-wlanapi-dll-file-when-geforec-experie/
 
 Verify that your GPU is CUDA compatible at https://developer.nvidia.com/cuda-gpus
 
+You will need to have Visual Studio installed to use the CUDA Toolkit. You can download Visual Studio Community 2019 at https://visualstudio.microsoft.com/vs/
+
 If you are using an NVIDIA GPU, you may need to install the CUDA Toolkit at https://developer.nvidia.com/cuda-toolkit-archive
 
 Make sure you have the correct version of the CUDA Toolkit installed for your GPU and the version of PyTorch you are using (12.4 is what was used in this setup).
 
-It is HIGHLY recommended to use Anaconda for package management if you are using a GPU. It is a much easier way to manage your packages and environments. Most of the issues you ma run into can be solved by simply using Anaconda.
+It is HIGHLY recommended to use Anaconda for package management if you are using a GPU. It is a much easier way to manage your packages and environments. Most of the issues you may run into can be solved by simply using Anaconda.
 
 If you are having issues with sqlalchemy connecting to a server, ensure you have the proper ODBC driver installed. Driver 18 is the current most up-to-date version: https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16
 
 If you haven't already, you may need to install the C++ redistributable package for Visual Studio 2019: https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0
+
+
