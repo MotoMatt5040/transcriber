@@ -43,7 +43,7 @@ conda activate env
 PyTorch can now be installed, browse to https://pytorch.org/get-started/locally/ for your specific needs or follow the setup below.
 
 Here you will select your system options, only use "CUDA" if you have an NVIDIA GPU and have installed the CUDA Toolkit (Check ISSUES below). Run <b><u>ONE</u></b> of the following commands to install the proper packages based on your setup.
-## Here is the current GPU package
+## Here is the current GPU package (Run ONE)
 
 ### pip:
 ```bash
@@ -54,7 +54,9 @@ pip3 install torch torchvision torchaudio openai-whisper pyodbc sqlalchemy pytho
 ```bash
 conda install pytorch torchvision torchaudio pytorch-cuda=12.4 -c pytorch -c nvidia pyodbc sqlalchemy
 ```
-## Here is the current cpu package
+##
+## OR
+## Here is the current cpu package (Run ONE)
 
 ### pip:
 ```bash
@@ -65,7 +67,8 @@ pip3 install torch torchvision torchaudio openai-whisper pyodbc sqlalchemy pytho
 ```bash
 conda install pytorch torchvision torchaudio cpuonly -c pytorch pyodbc sqlalchemy
 ```
-## If you opted not to use the above commands -
+##
+## If you opted not to run one of the above commands -
 You will need to install the following dependencies.
 
 ### conda:
