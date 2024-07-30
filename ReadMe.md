@@ -47,7 +47,7 @@ Here you will select your system options, only use "CUDA" if you have an NVIDIA 
 # Pre-Written Installation Commands (Or skip to Custom)
 You may choose ONE of the 4 pre-written commands you can use to install packages. They have been split into 2 separate categories for GPU and CPU installations. You may also choose NOT to use the commands written below, if that is the case you may skip to the Custom section.
 
-## Here is the current GPU package
+## GPU package
 
 ### pip:
 ```bash
@@ -60,7 +60,7 @@ conda install pytorch torchvision torchaudio pytorch-cuda=12.4 -c pytorch -c nvi
 ```
 ##
 ### OR
-## Here is the current CPU package
+## CPU package
 
 ### pip:
 ```bash
