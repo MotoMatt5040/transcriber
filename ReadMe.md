@@ -55,7 +55,7 @@ pip3 install torch torchvision torchaudio openai-whisper pyodbc sqlalchemy pytho
 conda install pytorch torchvision torchaudio pytorch-cuda=12.4 -c pytorch -c nvidia pyodbc sqlalchemy
 ```
 ##
-## OR
+### OR
 ## Here is the current cpu package (Run ONE)
 
 ### pip:
