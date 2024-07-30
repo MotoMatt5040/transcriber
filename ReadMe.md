@@ -45,7 +45,7 @@ PyTorch can now be installed, browse to https://pytorch.org/get-started/locally/
 Here you will select your system options, only use "CUDA" if you have an NVIDIA GPU and have installed the CUDA Toolkit (Check ISSUES below).
 
 ## You may choose ONE of the 4 pre-written commands you can use to install packages.
-They have been split into 2 separate categories for GPU and CPU installations. You may also choose NOT to use the commands written below, if that is the case you may skip to the CUSTOM section.
+They have been split into 2 separate categories for GPU and CPU installations. You may also choose NOT to use the commands written below, if that is the case you may skip to the <u>Custom</u> section.
 
 ## Here is the current GPU package
 
