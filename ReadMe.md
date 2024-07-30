@@ -68,8 +68,7 @@ pip3 install torch torchvision torchaudio openai-whisper pyodbc sqlalchemy pytho
 conda install pytorch torchvision torchaudio cpuonly -c pytorch pyodbc sqlalchemy
 ```
 ##
-## If you opted not to run one of the above commands -
-You will need to install the following dependencies.
+### If you opted not to run one of the above commands you will need to install the following dependencies.
 
 ### conda:
 ```bash
