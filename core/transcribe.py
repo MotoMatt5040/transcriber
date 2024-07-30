@@ -1,23 +1,14 @@
-import logging
-
 from dotenv import load_dotenv
 load_dotenv()
 
 import os
 import whisper
 import time
-import json
-import asyncio
-
-from datetime import date, timedelta
 
 from utils.models import ProjectTranscriptionManager, session
 
 
 ptm = ProjectTranscriptionManager(session)
-logger = logging.getLogger(__name__)
-logging.basicConfig(level=logging.WARNING)
-logger.propagate = True  # pass logs to root logger
 model = whisper.load_model("medium")
 
 
@@ -70,7 +61,6 @@ class Transcribe:
     def transcribe(self):
         self.transcription_json()
         text_removal, result = ptm.projects_to_transcribe()
-        print(text_removal)
         amount = len(result)
         if amount == 0:
             return
@@ -92,8 +82,11 @@ class Transcribe:
                 if not self.transcription_dict.get(item.ProjectID):
                     self.transcription_errors.append(item.ProjectID)
 
-                file_path = f'{item.Question}_{item.SurveyID}.wav'
-                transcription = model.transcribe(rf'{self.transcription_dict[item.ProjectID]['wav_path']}\{file_path}')
+                file_name = f'{item.Question}_{item.SurveyID}.wav'
+                file_path = f'{self.transcription_dict[item.ProjectID]['wav_path']}/{file_name}'
+                if not os.path.exists(file_path):
+                    continue
+                transcription = model.transcribe(file_path)
                 text = transcription['text']
                 match = 0
 
@@ -118,7 +111,7 @@ class Transcribe:
         print(f'Transcription completed in {round(end - start)}s')
 
         if self.transcription_errors:
-            logger.warning(f'Transcription errors were found. Records have been recorded in the transcription_errors.log file.')
+            print(f'Transcription errors were found. Records have been recorded in the transcription_errors.log file.')
             for err in self.transcription_errors:
-                logger.warning("    ", err)
+                print("    ", err)
 
