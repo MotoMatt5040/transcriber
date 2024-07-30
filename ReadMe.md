@@ -77,17 +77,15 @@ conda install pyodbc sqlalchemy
 ```bash
 pip install pyodbc sqlalchemy python-dotenv openai-whisper
 ```
-
-<br/>
+##
 
 Finally, run the following command to install the remaining dependencies in conda. This step is skipped when using virtualenv and pip
-### conda:
+## conda:
 I did have to use pip inside conda, while not ideal, it is a workaround
 ```bash
 pip install openai-whisper python-dotenv
 ```
-
-<br/>
+##
 
 You how have all dependencies installed and can run the following script
 
