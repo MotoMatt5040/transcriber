@@ -1,4 +1,7 @@
 # Installing dependencies
+
+### Python 3.12.4
+
 This script is designed to run on Windows, but can be modified to run on other systems
  
 Install chocolatey at https://chocolatey.org/install#individual
@@ -22,32 +25,67 @@ Next install the FFMPEG package using the following command
 choco install ffmpeg
 ```
 
-Now, create a python virtual environment using
+Now, create a python virtual environment using 
+
+### virtualenv
 ```bash
-python -m venv venv
+python -m venv env
 .\venv\Scripts\activate
 ```
 
-PyTorch can now be installed, browse to https://pytorch.org/get-started/locally/
-
-Here you will select your system options, only use "CUDA" if you have an NVIDIA
-
-Here is the current cpu package
+### Anaconda
 ```bash
-pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
-```
-Here is the current GPU package
-```bash
-pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+conda create -n env python=3.12.4
+conda activate env
 ```
 
-Run one of the above commands inside your virtual environment terminal
+PyTorch can now be installed, browse to https://pytorch.org/get-started/locally/ for your specific needs or follow the setup below.
 
-Finally, run the following command
+Here you will select your system options, only use "CUDA" if you have an NVIDIA GPU and have installed the CUDA Toolkit (Check ISSUES below). Run <b><u>ONE</u></b> of the following commands to install the proper packages based on your setup.
+## Here is the current GPU package
+
+### pip:
 ```bash
-pip install openai-whisper
-pip install -r requirements.txt
+pip3 install torch torchvision torchaudio openai-whisper pyodbc sqlalchemy python-dotenv --index-url https://download.pytorch.org/whl/cu124
 ```
+
+### conda:
+```bash
+conda install pytorch torchvision torchaudio pytorch-cuda=12.4 -c pytorch -c nvidia pyodbc sqlalchemy
+```
+## Here is the current cpu package
+
+### pip:
+```bash
+pip3 install torch torchvision torchaudio openai-whisper pyodbc sqlalchemy python-dotenv --index-url https://download.pytorch.org/whl/cpu
+```
+
+### conda:
+```bash
+conda install pytorch torchvision torchaudio cpuonly -c pytorch pyodbc sqlalchemy
+```
+If you opted to use the PyTorch website for the command for your needs, you will need to install the following dependencies.
+
+### conda:
+```bash
+conda install pyodbc sqlalchemy
+```
+
+### pip:
+```bash
+pip install pyodbc sqlalchemy python-dotenv openai-whisper
+```
+
+<br/>
+
+Finally, run the following command to install the remaining dependencies in conda. This step is skipped when using virtualenv and pip
+### conda:
+I did have to use pip inside conda, while not ideal, it is a workaround
+```bash
+pip install openai-whisper python-dotenv
+```
+
+<br/>
 
 You how have all dependencies installed and can run the following script
 
@@ -58,3 +96,21 @@ Multiple files can be done using ```whisper <filename1> <filename2> <filename3>`
 If there are spaces in your filename, use quotes around the file name
 
 You can use ```--model``` to specify the model you want to use
+
+# Issues (Windows Only)
+
+If you are using an NVIDIA Graphics card, please install GeForce experience. It is the easiest way to update your drivers if you don't need to get into serious dev.
+
+If you are installing on Windows Server 2022 and run into wlanapi.dll is missing, follow the instructions here https://www.nvidia.com/en-us/geforce/forums/geforce-experience/14/347710/can-not-find-wlanapi-dll-file-when-geforec-experie/
+
+Verify that your GPU is CUDA compatible at https://developer.nvidia.com/cuda-gpus
+
+If you are using an NVIDIA GPU, you may need to install the CUDA Toolkit at https://developer.nvidia.com/cuda-toolkit-archive
+
+Make sure you have the correct version of the CUDA Toolkit installed for your GPU and the version of PyTorch you are using (12.4 is what was used in this setup).
+
+It is HIGHLY recommended to use Anaconda for package management if you are using a GPU. It is a much easier way to manage your packages and environments. Most of the issues you ma run into can be solved by simply using Anaconda.
+
+If you are having issues with sqlalchemy connecting to a server, ensure you have the proper ODBC driver installed. Driver 18 is the current most up-to-date version: https://learn.microsoft.com/en-us/sql/connect/odbc/download-odbc-driver-for-sql-server?view=sql-server-ver16
+
+If you haven't already, you may need to install the C++ redistributable package for Visual Studio 2019: https://support.microsoft.com/en-us/topic/the-latest-supported-visual-c-downloads-2647da03-1eea-4433-9aff-95f26a218cc0
