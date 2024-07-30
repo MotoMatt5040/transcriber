@@ -112,7 +112,7 @@ If you are installing on Windows Server 2022 and run into wlanapi.dll is missing
 
 Verify that your GPU is CUDA compatible at https://developer.nvidia.com/cuda-gpus
 
-You will need to have Visual Studio installed to use the CUDA Toolkit. You can download Visual Studio Community 2019 at https://visualstudio.microsoft.com/vs/
+You will need to have Visual Studio installed to use the CUDA Toolkit. You can download Visual Studio at https://visualstudio.microsoft.com/vs/
 
 If you are using an NVIDIA GPU, you may need to install the CUDA Toolkit at https://developer.nvidia.com/cuda-toolkit-archive
 
