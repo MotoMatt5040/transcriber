@@ -53,7 +53,7 @@ You may choose ONE of the 4 pre-written commands you can use to install packages
 ```bash
 pip3 install torch torchvision torchaudio openai-whisper pyodbc sqlalchemy python-dotenv --index-url https://download.pytorch.org/whl/cu124
 ```
-
+OR
 ### conda:
 ```bash
 conda install pytorch torchvision torchaudio pytorch-cuda=12.4 -c pytorch -c nvidia pyodbc sqlalchemy
@@ -66,7 +66,7 @@ conda install pytorch torchvision torchaudio pytorch-cuda=12.4 -c pytorch -c nvi
 ```bash
 pip3 install torch torchvision torchaudio openai-whisper pyodbc sqlalchemy python-dotenv --index-url https://download.pytorch.org/whl/cpu
 ```
-
+OR
 ### conda:
 ```bash
 conda install pytorch torchvision torchaudio cpuonly -c pytorch pyodbc sqlalchemy
