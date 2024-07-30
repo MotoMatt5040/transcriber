@@ -1,11 +1,22 @@
-from dotenv import load_dotenv
-load_dotenv()
-
+import torch
 import os
 import whisper
 import time
 
 from utils.models import ProjectTranscriptionManager, session
+
+cuda_is_available = torch.cuda.is_available()
+cuda_device_name = None
+if cuda_is_available:
+    print("CUDA is available", cuda_is_available)
+    print("CUDA devices available:", torch.cuda.device_count())
+    print("Current CUDA device", torch.cuda.current_device())
+    print("Current CUDA device address", torch.cuda.device(0))
+    cuda_device_name = torch.cuda.get_device_name(0)
+    print("Current CUDA device name:", cuda_device_name)
+
+
+
 
 
 ptm = ProjectTranscriptionManager(session)
@@ -62,10 +73,19 @@ class Transcribe:
         self.transcription_json()
         text_removal, result = ptm.projects_to_transcribe()
         amount = len(result)
+
+        match cuda_device_name:
+            case "NVIDIA GeForce RTX 4090":
+                estimated_time = round(amount * 2)
+            case "Tesla T4":
+                estimated_time = round(amount * 4)
+            case _:
+                estimated_time = round(amount * 6)
+
         if amount == 0:
             return
         print(f'Total amount of records to transcribe: {amount}')
-        print(f'Estimated time to complete: {round(amount * 2)}s')
+        print(f'Estimated time to complete: {estimated_time}s')
         start = time.perf_counter()
         print_progress_bar(0, amount, prefix='Progress:', suffix='Complete', length=50)
         if result is not None:
