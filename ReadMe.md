@@ -116,7 +116,7 @@ You will need to have Visual Studio installed to use the CUDA Toolkit. You can d
 
 If you are using an NVIDIA GPU, you may need to install the CUDA Toolkit at https://developer.nvidia.com/cuda-toolkit-archive
 
-Make sure you have the correct version of the CUDA Toolkit installed for your GPU and the version of PyTorch you are using (12.4 is what was used in this setup).
+Make sure you have the correct version of the CUDA Toolkit installed for your GPU and the version of PyTorch you are using (12.4.1 is what was used in this setup).
 
 It is HIGHLY recommended to use Anaconda for package management if you are using a GPU. It is a much easier way to manage your packages and environments. Most of the issues you may run into can be solved by simply using Anaconda.
 
