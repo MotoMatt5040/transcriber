@@ -1,4 +1,4 @@
-# Installing dependencies
+# Installing Dependencies
 
 ### Python 3.12.4
 
@@ -33,7 +33,7 @@ python -m venv env
 .\venv\Scripts\activate
 ```
 
-## Anaconda: (Check ISSUES for installation)
+## Anaconda: (Check Issues for installation)
 ```bash
 conda create -n env python=3.12.4
 conda activate env
@@ -41,7 +41,7 @@ conda activate env
 ##
 PyTorch can now be installed, browse to https://pytorch.org/get-started/locally/ for your specific needs or follow the setup below.
 
-Here you will select your system options, only use "CUDA" if you have an NVIDIA GPU and have installed the CUDA Toolkit (Check ISSUES below).
+Here you will select your system options, only use "CUDA" if you have an NVIDIA GPU and have installed the CUDA Toolkit (Check Issues below).
 
 # Pre-Written Installation Commands (Or skip to Custom)
 You may choose ONE of the 4 pre-written commands you can use to install packages. They have been split into 2 separate categories for GPU and CPU installations. You may also choose NOT to use the commands written below, if that is the case you may skip to the Custom section.
