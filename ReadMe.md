@@ -6,15 +6,14 @@ This script is designed to run on Windows, but can be modified to run on other s
  
 Install chocolatey at https://chocolatey.org/install#individual
 
-Make sure to use the individual installation
+Make sure to use the individual installation and copy the string text it provides and paste into an Administrative Powershell.
 
 Here is the link provided for you at the time of writing this program 6/25/2024
 ```bash 
 Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://community.chocolatey.org/install.ps1'))
-```    
+```
 
-Copy the string text it provides and paste into an Administrative Powershell.
-If you run into errors you may want to run the follow commands first
+If you run into errors you may want to run the following commands before attempting the above command again.
 ```bash  
 $chocolateyPath = "C:\ProgramData\chocolatey\bin"
 $env:Path += ";$chocolateyPath"
@@ -93,7 +92,7 @@ pip install openai-whisper python-dotenv
 ```
 ##
 
-You how have all dependencies installed and can run the following script
+You now have all dependencies installed and can run the following script
 
 Files can be transcribed through the command prompt or terminal using the command ```whisper <filename>```
 
