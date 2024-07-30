@@ -42,8 +42,12 @@ conda activate env
 ##
 PyTorch can now be installed, browse to https://pytorch.org/get-started/locally/ for your specific needs or follow the setup below.
 
-Here you will select your system options, only use "CUDA" if you have an NVIDIA GPU and have installed the CUDA Toolkit (Check ISSUES below). Run <b><u>ONE</u></b> of the following commands to install the proper packages based on your setup.
-## Here is the current GPU package (Run ONE)
+Here you will select your system options, only use "CUDA" if you have an NVIDIA GPU and have installed the CUDA Toolkit (Check ISSUES below).
+
+## Below are 4 commands you can use to install packages the way I have done so, please only run <u>ONE</u> of the 4 commands below.
+They have been split into 2 separate categories for GPU and CPU installations.
+
+## Here is the current GPU package
 
 ### pip:
 ```bash
@@ -56,7 +60,7 @@ conda install pytorch torchvision torchaudio pytorch-cuda=12.4 -c pytorch -c nvi
 ```
 ##
 ### OR
-## Here is the current cpu package (Run ONE)
+## Here is the current CPU package
 
 ### pip:
 ```bash
