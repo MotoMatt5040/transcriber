@@ -195,8 +195,8 @@ class Transcribe:
 
     Default load_model is medium if no model is specified
     """
-    def __init__(self, load_model: str = "medium"):
-        self.model = load_model
+    def __init__(self, model: str = "medium"):
+        self.model = model
         self.transcription_dict = {}
         self.transcription_errors = []
 
