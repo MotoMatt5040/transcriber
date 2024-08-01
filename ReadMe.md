@@ -50,7 +50,7 @@ You may choose ONE of the 4 pre-written commands you can use to install packages
 
 ### pip:
 ```bash
-pip3 install torch torchvision torchaudio openai-whisper pyodbc sqlalchemy python-dotenv --index-url https://download.pytorch.org/whl/cu124
+pip3 install torch torchvision torchaudio openai-whisper pyodbc sqlalchemy python-dotenv pydub pyannote --index-url https://download.pytorch.org/whl/cu124
 ```
 OR
 ### conda:
@@ -63,7 +63,7 @@ conda install pytorch torchvision torchaudio pytorch-cuda=12.4 -c pytorch -c nvi
 
 ### pip:
 ```bash
-pip3 install torch torchvision torchaudio openai-whisper pyodbc sqlalchemy python-dotenv --index-url https://download.pytorch.org/whl/cpu
+pip3 install torch torchvision torchaudio openai-whisper pyodbc sqlalchemy python-dotenv pydub pyannote--index-url https://download.pytorch.org/whl/cpu
 ```
 OR
 ### conda:
@@ -75,20 +75,13 @@ conda install pytorch torchvision torchaudio cpuonly -c pytorch pyodbc sqlalchem
 Install the following dependencies.
 ## pip:
 ```bash
-pip install pyodbc sqlalchemy python-dotenv openai-whisper
+pip install pyodbc sqlalchemy python-dotenv openai-whisper pydub pyannote
 ```
 
 ## conda:
 ```bash
 conda install pyodbc sqlalchemy
-```
-##
-
-Finally, run the following command to install the remaining dependencies in conda. This step is skipped when using virtualenv and pip
-## conda:
-I did have to use pip inside conda, while not ideal, it is a workaround
-```bash
-pip install openai-whisper python-dotenv
+pip install openai-whisper python-dotenv pydub pyannote
 ```
 ##
 
