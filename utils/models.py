@@ -2,7 +2,6 @@ import os
 from sqlalchemy import create_engine, Column, String, Integer, Date, BigInteger, or_, not_, and_, CHAR, Text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import declarative_base
-from datetime import date
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -76,7 +75,7 @@ class ProjectTranscriptionManager:
     def questions_dict(self, questions):
         q = {}
         for question in questions:
-            text = question.QText.split('\n')
+            text: list = question.QText.split('\n')
 
-            q[question.OENum] = {'text': text[0].split(), 'probe': text[4].split()}
+            q[question.OENum] = {'text': text[0], 'probe': text[4]}
         return q

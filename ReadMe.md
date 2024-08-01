@@ -43,19 +43,19 @@ PyTorch can now be installed, browse to https://pytorch.org/get-started/locally/
 
 Here you will select your system options, only use "CUDA" if you have an NVIDIA GPU and have installed the CUDA Toolkit (Check Issues below).
 
-# Pre-Written Installation Commands (Or skip to Custom)
+# Pre-Written Installation Commands
 You may choose ONE of the 4 pre-written commands you can use to install packages. They have been split into 2 separate categories for GPU and CPU installations. You may also choose NOT to use the commands written below, if that is the case you may skip to the Custom section.
 
 ## GPU package
 
 ### pip:
 ```bash
-pip3 install torch torchvision torchaudio openai-whisper pyodbc sqlalchemy python-dotenv --index-url https://download.pytorch.org/whl/cu124
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
 ```
 OR
 ### conda:
 ```bash
-conda install pytorch torchvision torchaudio pytorch-cuda=12.4 -c pytorch -c nvidia pyodbc sqlalchemy
+conda install pytorch torchvision torchaudio pytorch-cuda=12.4 -c pytorch -c nvidia 
 ```
 ##
 
@@ -63,32 +63,25 @@ conda install pytorch torchvision torchaudio pytorch-cuda=12.4 -c pytorch -c nvi
 
 ### pip:
 ```bash
-pip3 install torch torchvision torchaudio openai-whisper pyodbc sqlalchemy python-dotenv --index-url https://download.pytorch.org/whl/cpu
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 ```
 OR
 ### conda:
 ```bash
-conda install pytorch torchvision torchaudio cpuonly -c pytorch pyodbc sqlalchemy
+conda install pytorch torchvision torchaudio cpuonly -c pytorch
 ```
 ##
-# Custom (If you did not run one of the above commands)
+# Other Dependencies
 Install the following dependencies.
 ## pip:
 ```bash
-pip install pyodbc sqlalchemy python-dotenv openai-whisper
+pip install openai-whisper pyodbc sqlalchemy python-dotenv pydub pyannote
 ```
 
 ## conda:
 ```bash
 conda install pyodbc sqlalchemy
-```
-##
-
-Finally, run the following command to install the remaining dependencies in conda. This step is skipped when using virtualenv and pip
-## conda:
-I did have to use pip inside conda, while not ideal, it is a workaround
-```bash
-pip install openai-whisper python-dotenv
+pip install openai-whisper python-dotenv pydub pyannote
 ```
 ##
 
