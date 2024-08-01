@@ -75,13 +75,13 @@ conda install pytorch torchvision torchaudio cpuonly -c pytorch
 Install the following dependencies.
 ## pip:
 ```bash
-pip install openai-whisper pyodbc sqlalchemy python-dotenv pydub pyannote
+pip install openai-whisper pyodbc sqlalchemy python-dotenv pydub pyannote.audio
 ```
 
 ## conda:
 ```bash
 conda install pyodbc sqlalchemy
-pip install openai-whisper python-dotenv pydub pyannote
+pip install openai-whisper python-dotenv pydub pyannote.audio
 ```
 ##
 
