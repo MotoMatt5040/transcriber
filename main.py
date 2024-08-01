@@ -8,7 +8,7 @@ load_dotenv()
 
 #  Please run t.transcribe to auto perform all necessary functions.
 #  Using this function will prevent from having to manually call other functions.
-t = Transcribe()
+t = Transcribe(load_model='large')
 while True:
     sleep_time_in_minutes = 5
     t.transcribe()
