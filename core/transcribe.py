@@ -3,6 +3,7 @@ import os
 import whisper
 import time
 import re
+import logging
 
 from utils.models import ProjectTranscriptionManager, session
 from pydub import AudioSegment
@@ -206,12 +207,15 @@ class Transcribe:
             self.transcription_dict[project.ProjectID]['records'] = []
             if project.ProjectID.upper().endswith("C"):
                 wav_path = rf'{os.environ['cell_wav']}{project.ProjectID}PCM'
-                self.transcription_dict[project.ProjectID]['wav_path'] = wav_path
-                self.transcription_dict[project.ProjectID]['wav'] = os.listdir(wav_path)
+                if os.path.exists(wav_path):
+                    self.transcription_dict[project.ProjectID]['wav_path'] = wav_path
+                    self.transcription_dict[project.ProjectID]['wav'] = os.listdir(wav_path)
             else:
                 wav_path = rf'{os.environ['landline_wav']}{project.ProjectID}PCM'
-                self.transcription_dict[project.ProjectID]['wav_path'] = wav_path
-                self.transcription_dict[project.ProjectID]['wav'] = os.listdir(wav_path)
+                if os.path.exists(wav_path):
+                    self.transcription_dict[project.ProjectID]['wav_path'] = wav_path
+                    self.transcription_dict[project.ProjectID]['wav'] = os.listdir(wav_path)
+
 
     def transcribe(self):
         self.transcription_json()
