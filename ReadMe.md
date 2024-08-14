@@ -1,3 +1,13 @@
+# Installing / Updating Release
+
+Please download the source zip from the latest release. 
+
+Please request a ```.env``` file and a ```.bat``` file if you do not have the most recent version. 
+
+Updated ```.env``` and ```.bat``` files will be noted in the release notes.
+
+These files will need to be placed in the root directory of the project (where main.py is).
+
 # Installing Dependencies
 
 ### Python 3.12.4
