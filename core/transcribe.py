@@ -203,19 +203,22 @@ class Transcribe:
 
     def transcription_json(self):
         for project in ptm.get_active_projects():
-            self.transcription_dict[project.ProjectID] = {}
-            self.transcription_dict[project.ProjectID]['records'] = []
-            if project.ProjectID.upper().endswith("C"):
-                wav_path = rf'{os.environ['cell_wav']}{project.ProjectID}PCM'
-                if os.path.exists(wav_path):
-                    self.transcription_dict[project.ProjectID]['wav_path'] = wav_path
-                    self.transcription_dict[project.ProjectID]['wav'] = os.listdir(wav_path)
-            else:
-                wav_path = rf'{os.environ['landline_wav']}{project.ProjectID}PCM'
-                if os.path.exists(wav_path):
-                    self.transcription_dict[project.ProjectID]['wav_path'] = wav_path
-                    self.transcription_dict[project.ProjectID]['wav'] = os.listdir(wav_path)
+            project_id = project.ProjectID
+            self.transcription_dict[project_id] = {'records': []}
 
+            if project_id.upper().endswith("C"):
+                base_path = os.environ['cell_wav']
+            else:
+                base_path = os.environ['landline_wav']
+
+            wav_path = rf'{base_path}{project_id}PCM'
+
+            if not os.path.exists(wav_path):
+                del self.transcription_dict[project_id]
+                continue
+
+            self.transcription_dict[project_id]['wav_path'] = wav_path
+            self.transcription_dict[project_id]['wav'] = os.listdir(wav_path)
 
     def transcribe(self):
         self.transcription_json()
