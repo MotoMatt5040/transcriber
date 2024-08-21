@@ -238,8 +238,8 @@ class Transcribe:
                 if 'Proof' in item.RecStrID:
                     continue
 
-                # if item.Transcription is not None:
-                #     continue
+                if item.Transcription is not None:
+                    continue
 
                 if not item.ProjectID:
                     continue
