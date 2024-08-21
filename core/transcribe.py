@@ -67,20 +67,20 @@ def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, lengt
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
     filledLength = int(length * iteration // total)
     bar = fill * filledLength + '-' * (length - filledLength)
-    print(f'\r{prefix} |{bar}| {round((total - iteration) * 2)}s - {iteration}/{total} - {percent}% {suffix}', end=print_end)
+    print(f'\r{prefix} |{bar}| {estimate_time(total, iteration)}s - {iteration}/{total} - {percent}% {suffix}', end=print_end)
     # Print New Line on Complete
     if iteration == total:
         print()
 
 
-def estimate_time(amount: int) -> int:
+def estimate_time(amount: int, iteration: int = 0) -> int:
     match cuda_device_name:
         case "NVIDIA GeForce RTX 4090":
-            return round(amount * 2)
+            return round((amount - iteration) * 2)
         case "Tesla T4":
-            return round(amount * 8)
+            return round((amount - iteration) * 8)
         case _:
-            return round(amount * 16)
+            return round((amount - iteration) * 16)
 
 
 def clean_text(text: str) -> list:
@@ -336,7 +336,7 @@ class Transcribe:
 
                 item.Transcription = get_sentence_case(speaker_transcription.strip())
                 print_progress_bar(i + 1, amount, prefix='Progress:', suffix='Complete', length=50)
-        session.commit()
+        # session.commit()
         end = time.perf_counter()
         print(f'Transcription completed in {round(end - start)}s')
 
