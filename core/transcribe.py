@@ -336,7 +336,7 @@ class Transcribe:
 
                 item.Transcription = get_sentence_case(speaker_transcription.strip())
                 print_progress_bar(i + 1, amount, prefix='Progress:', suffix='Complete', length=50)
-        # session.commit()
+        session.commit()
         end = time.perf_counter()
         print(f'Transcription completed in {round(end - start)}s')
 
