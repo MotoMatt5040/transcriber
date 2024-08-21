@@ -238,8 +238,8 @@ class Transcribe:
                 if 'Proof' in item.RecStrID:
                     continue
 
-                if item.Transcription is not None:
-                    continue
+                # if item.Transcription is not None:
+                #     continue
 
                 if not item.ProjectID:
                     continue
@@ -331,12 +331,12 @@ class Transcribe:
                     temp.append(segment_transcriptions)
 
                 if not interviewer:
-                    print_red("Interviewer not found")
+                    print_red(f"\nInterviewer not found: {item.ProjectID} - {item.Question} - {item.SurveyID}\n")
                     speaker_transcription = model.transcribe(file_path, language='en')['text']
 
                 item.Transcription = get_sentence_case(speaker_transcription.strip())
+                session.commit()
                 print_progress_bar(i + 1, amount, prefix='Progress:', suffix='Complete', length=50)
-        session.commit()
         end = time.perf_counter()
         print(f'Transcription completed in {round(end - start)}s')
 
