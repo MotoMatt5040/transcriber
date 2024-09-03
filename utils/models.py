@@ -1,7 +1,10 @@
 import os
+import logging
+
 from sqlalchemy import create_engine, Column, String, Integer, Date, BigInteger, or_, not_, and_, CHAR, Text
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import declarative_base
+from utils.logger_config import logger
 
 from dotenv import load_dotenv
 load_dotenv()
@@ -56,21 +59,24 @@ class ProjectTranscriptionManager:
 
     def projects_to_transcribe(self):
         active_projects = self.get_active_projects()
-        if active_projects:
-            active_questions_projects_list = or_(Questions.ProjectID == project.ProjectID for project in active_projects)
-            questions = self.session.query(Questions).where(active_questions_projects_list).all()
-            questions = self.questions_dict(questions)
 
-            active_detail_projects_list = or_(DetailRecords.ProjectID == project.ProjectID for project in active_projects)
-            result = self.session.query(DetailRecords).where(
-                and_(
-                    active_detail_projects_list,
-                    DetailRecords.PCMHome > 0,
-                    DetailRecords.TypeFlowStatus == 14,
-                    DetailRecords.TypeCode == 0,
-                    DetailRecords.Transcription.is_(None)
-                )).all()
-            return questions, result
+        if not active_projects:
+            return None
+
+        active_questions_projects_list = or_(Questions.ProjectID == project.ProjectID for project in active_projects)
+        questions = self.session.query(Questions).where(active_questions_projects_list).all()
+        questions = self.questions_dict(questions)
+
+        active_detail_projects_list = or_(DetailRecords.ProjectID == project.ProjectID for project in active_projects)
+        result = self.session.query(DetailRecords).where(
+            and_(
+                active_detail_projects_list,
+                DetailRecords.PCMHome > 0,
+                DetailRecords.TypeFlowStatus == 14,
+                DetailRecords.TypeCode == 0,
+                DetailRecords.Transcription.is_(None)
+            )).all()
+        return questions, result
 
     def questions_dict(self, questions):
         q = {}
