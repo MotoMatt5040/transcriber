@@ -10,23 +10,25 @@ from pydub import AudioSegment
 from pydub.silence import split_on_silence
 from pyannote.audio import Pipeline
 
+from utils.logger_config import logger
+
 pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.1", use_auth_token=os.environ['hugging_face_token'])
 
 cuda_is_available = torch.cuda.is_available()
 cuda_device_name = None
 if cuda_is_available:
-    print("CUDA is available", cuda_is_available)
-    print("CUDA devices available:", torch.cuda.device_count())
-    print("Current CUDA device", torch.cuda.current_device())
-    print("Current CUDA device address", torch.cuda.device(0))
+    logger.info(f"CUDA is available {cuda_is_available}")
+    logger.info(f"CUDA devices available: {torch.cuda.device_count()}")
+    logger.info(f"Current CUDA device {torch.cuda.current_device()}")
+    logger.info(f"Current CUDA device address {torch.cuda.device(0)}")
     cuda_device_name = torch.cuda.get_device_name(0)
-    print("Current CUDA device name:", cuda_device_name)
+    logger.info(f"Current CUDA device name: {cuda_device_name}")
 
     torch.set_default_device('cuda')
     pipeline.to(torch.device('cuda'))
 
 else:
-    print("CUDA is not available, using CPU instead")
+    logger.warning("CUDA is not available, using CPU instead")
     torch.set_default_device('cpu')
     pipeline.to(torch.device('cpu'))
 
@@ -222,15 +224,19 @@ class Transcribe:
 
     def transcribe(self):
         self.transcription_json()
-        text_removal, result = ptm.projects_to_transcribe()
+        temp = ptm.projects_to_transcribe()
+        if not temp:
+            logger.debug("Projects to transcribe is empty")
+            return
+        text_removal, result = temp
         amount = len(result)
 
         estimated_time = estimate_time(amount)
 
         if amount == 0:
             return
-        print(f'Total amount of records to transcribe: {amount}')
-        print(f'Estimated time to complete: {estimated_time}s')
+        logger.info(f'Total amount of records to transcribe: {amount}')
+        logger.info(f'Estimated time to complete: {estimated_time}s')
         start = time.perf_counter()
         print_progress_bar(0, amount, prefix='Progress:', suffix='Complete', length=50)
         if result is not None:
@@ -338,12 +344,12 @@ class Transcribe:
                 session.commit()
                 print_progress_bar(i + 1, amount, prefix='Progress:', suffix='Complete', length=50)
         end = time.perf_counter()
-        print(f'Transcription completed in {round(end - start)}s')
+        logger.info(f'Transcription completed in {round(end - start)}s')
 
         if self.transcription_errors:
-            print(f'Transcription errors were found. Records have been recorded in the transcription_errors.log file.')
+            logger.error(f'Transcription errors were found. Records have been recorded in the transcription_errors.log file.')
             for err in self.transcription_errors:
-                print("    ", err)
+                logger.error("    ", err)
 
     @property
     def model(self):
