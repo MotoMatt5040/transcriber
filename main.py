@@ -1,14 +1,15 @@
+from dotenv import load_dotenv
+
+load_dotenv()
+
 import argparse
 import time
 import logging
 from logging.handlers import TimedRotatingFileHandler
 import traceback
 
-from dotenv import load_dotenv
 from core.transcribe import Transcribe
 from utils.logger_config import logger
-
-load_dotenv()
 
 
 parser = argparse.ArgumentParser(description="Transcribe audio files with specified settings.")
