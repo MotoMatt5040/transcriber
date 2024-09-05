@@ -52,7 +52,7 @@ def print_light_green(*args):
     print(f"\033[92m{message}\033[0m")
 
 
-def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, length=100, fill='█', print_end=""):
+def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, length=100, fill='█', file_path='', print_end=""):
     """
     Call in a loop to create terminal progress bar
     @params:
@@ -68,7 +68,7 @@ def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, lengt
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
     filledLength = int(length * iteration // total)
     bar = fill * filledLength + '-' * (length - filledLength)
-    print(f'\r{prefix} |{bar}| {estimate_time(total, iteration)}s - {iteration}/{total} - {percent}% {suffix}', end=print_end)
+    print(f'\r{prefix} |{bar}| {estimate_time(total, iteration)}s - {iteration}/{total} - {percent}% {suffix} - {file_path}', end=print_end)
     # Print New Line on Complete
     if iteration == total:
         print()
@@ -232,25 +232,18 @@ class Transcribe:
                 if not item.ProjectID:
                     continue
 
-                file_path = None
-                file_name = f'{item.Question}_{item.SurveyID}.wav'
-                for p_val in range(1, 3):
-                    base_path = f"{os.environ['wav_path_begin']}{p_val}{os.environ['wav_path_end']}/{item.ProjectID}PCM"
-                    if not os.path.exists(base_path):
-                        continue
-                    file_path = f'{base_path}/{file_name}'
-                    if not os.path.exists(file_path):
-                        file_path = None
-                        continue
+                file_path = f"{os.environ['wav_path_begin']}{item.PCMHome}{os.environ['wav_path_end']}/{item.ProjectID}PCM/{item.Question}_{item.SurveyID}.wav"
 
-                if not file_path:
-                    logger.debug(f"File does not exist for {file_name}")
+                if not os.path.exists(file_path):
+                    logger.debug(f"File does not exist for: {file_path}")
                     continue
 
                 if get_audio_length(file_path) < 10:
                     item.Transcription = ''
                     logger.warning(f"Audio file is too short: {file_path}")
                     continue
+
+                print_progress_bar(i + 1, amount, prefix='Progress:', suffix='Complete', length=50, file_path=file_path)
 
                 processed_file = preprocess_audio(file_path)
 
