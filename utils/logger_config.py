@@ -6,20 +6,24 @@ import os
 
 # Set up the main logger
 logger = logging.getLogger('log')
-if os.environ['environment'] == 'dev':
-    logger.setLevel(logging.DEBUG)
-else:
-    logger.setLevel(logging.ERROR)
+
+env = os.environ['environment']
 
 # Console handler
 ch = logging.StreamHandler()
-ch.setLevel(logging.DEBUG)
+if env == 'dev':
+    ch.setLevel(logging.DEBUG)
+elif env == 'prod':
+    ch.setLevel(logging.ERROR)
 ch.setFormatter(CustomFormatter())
 logger.addHandler(ch)
 
 # File handler with monthly rotation
 fh = TimedRotatingFileHandler('logs/logs.log', when='W0', interval=1, backupCount=3)
-fh.setLevel(logging.WARNING)
+if env == 'dev':
+    fh.setLevel(logging.WARNING)
+elif env == 'prod':
+    fh.setLevel(logging.INFO)
 plain_formatter = logging.Formatter("%(asctime)s - %(name)s - %(filename)s - %(levelname)s - Line: %(lineno)d - %(message)s")
 fh.setFormatter(plain_formatter)
 logger.addHandler(fh)
