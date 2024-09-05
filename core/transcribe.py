@@ -172,7 +172,7 @@ def preprocess_audio(file_path):
 
 def get_audio_length(file_path):
     audio = AudioSegment.from_file(file_path)
-    duration_seconds = len(audio) / 10  # Duration in seconds
+    duration_seconds = len(audio) / 1000  # Duration in seconds
     return duration_seconds
 
 
@@ -204,18 +204,24 @@ class Transcribe:
         self.transcription_errors = []
 
     def transcription_json(self):
+        wav_path = None
         for project in ptm.get_active_projects():
             project_id = project.ProjectID
             self.transcription_dict[project_id] = {'records': []}
 
-            if project_id.upper().endswith("C"):
-                base_path = os.environ['cell_wav']
-            else:
-                base_path = os.environ['landline_wav']
+            for i in range(1, 3):
+                base_path = f"{os.environ['wav_path_begin']}{i}{os.environ['wav_path_end']}"
 
-            wav_path = rf'{base_path}{project_id}PCM'
+                wav_path = rf'{base_path}{project_id}PCM'
+                logger.debug(f"Checking path: {wav_path}")
+                if not os.path.exists(wav_path):
+                    logger.debug(f"Path does not exist: {wav_path}")
+                    wav_path = None
+                    continue
+                break
 
-            if not os.path.exists(wav_path):
+            if wav_path is None:
+                logger.info(f"Path not found for {project_id}. Removing from transcription list.")
                 del self.transcription_dict[project_id]
                 continue
 
@@ -255,6 +261,7 @@ class Transcribe:
 
                 file_name = f'{item.Question}_{item.SurveyID}.wav'
                 file_path = f'{self.transcription_dict[item.ProjectID]['wav_path']}/{file_name}'
+
                 if not os.path.exists(file_path):
                     continue
 
@@ -264,16 +271,6 @@ class Transcribe:
                     continue
 
                 processed_file = preprocess_audio(file_path)
-
-                # diarization = pipeline(processed_file)
-                # speakers_present = set()
-                #
-                # for turn, _, speaker in diarization.itertracks(yield_label=True):
-                #     speakers_present.add(speaker)
-                #
-                # if 'SPEAKER_02' in speakers_present:
-                #     print_red("Skipping file due to presence of SPEAKER_02")
-                #     item.Transcription = ''
 
                 # Segment the audio based on silence if needed
                 segment_files = segment_audio_by_silence(processed_file)
