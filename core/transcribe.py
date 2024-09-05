@@ -3,7 +3,6 @@ import os
 import whisper
 import time
 import re
-import logging
 
 from utils.models import ProjectTranscriptionManager, session
 from pydub import AudioSegment
@@ -203,38 +202,14 @@ class Transcribe:
         self.transcription_dict = {}
         self.transcription_errors = []
 
-    def transcription_json(self):
-        wav_path = None
-        for project in ptm.get_active_projects():
-            project_id = project.ProjectID
-            self.transcription_dict[project_id] = {'records': []}
-
-            for i in range(1, 3):
-                base_path = f"{os.environ['wav_path_begin']}{i}{os.environ['wav_path_end']}"
-
-                wav_path = rf'{base_path}{project_id}PCM'
-                logger.debug(f"Checking path: {wav_path}")
-                if not os.path.exists(wav_path):
-                    logger.debug(f"Path does not exist: {wav_path}")
-                    wav_path = None
-                    continue
-                break
-
-            if wav_path is None:
-                logger.info(f"Path not found for {project_id}. Removing from transcription list.")
-                del self.transcription_dict[project_id]
-                continue
-
-            self.transcription_dict[project_id]['wav_path'] = wav_path
-            self.transcription_dict[project_id]['wav'] = os.listdir(wav_path)
-
     def transcribe(self):
-        self.transcription_json()
-        temp = ptm.projects_to_transcribe()
-        if not temp:
+        # self.transcription_json()
+        res = ptm.projects_to_transcribe()
+        if not res:
             logger.debug("Projects to transcribe is empty")
             return
-        text_removal, result = temp
+
+        text_removal, result = res
         amount = len(result)
 
         estimated_time = estimate_time(amount)
@@ -243,6 +218,7 @@ class Transcribe:
             return
         logger.info(f'Total amount of records to transcribe: {amount}')
         logger.info(f'Estimated time to complete: {estimated_time}s')
+        time.sleep(0.1)
         start = time.perf_counter()
         print_progress_bar(0, amount, prefix='Progress:', suffix='Complete', length=50)
         if result is not None:
@@ -256,18 +232,24 @@ class Transcribe:
                 if not item.ProjectID:
                     continue
 
-                if not self.transcription_dict.get(item.ProjectID):
-                    self.transcription_errors.append(item.ProjectID)
-
+                file_path = None
                 file_name = f'{item.Question}_{item.SurveyID}.wav'
-                file_path = f'{self.transcription_dict[item.ProjectID]['wav_path']}/{file_name}'
+                for p_val in range(1, 3):
+                    base_path = f"{os.environ['wav_path_begin']}{p_val}{os.environ['wav_path_end']}/{item.ProjectID}PCM"
+                    if not os.path.exists(base_path):
+                        continue
+                    file_path = f'{base_path}/{file_name}'
+                    if not os.path.exists(file_path):
+                        file_path = None
+                        continue
 
-                if not os.path.exists(file_path):
+                if not file_path:
+                    logger.debug(f"File does not exist for {file_name}")
                     continue
 
                 if get_audio_length(file_path) < 10:
                     item.Transcription = ''
-                    print_red("Audio file is too short")
+                    logger.warning(f"Audio file is too short: {file_path}")
                     continue
 
                 processed_file = preprocess_audio(file_path)
@@ -334,14 +316,14 @@ class Transcribe:
                     temp.append(segment_transcriptions)
 
                 if not interviewer:
-                    print_red(f"\nInterviewer not found: {item.ProjectID} - {item.Question} - {item.SurveyID}\n")
+                    logger.warning(f"Interviewer not found: {item.ProjectID} - {item.Question} - {item.SurveyID} - {file_path}")
                     speaker_transcription = model.transcribe(file_path, language='en')['text']
 
                 item.Transcription = get_sentence_case(speaker_transcription.strip())
                 session.commit()
                 print_progress_bar(i + 1, amount, prefix='Progress:', suffix='Complete', length=50)
         end = time.perf_counter()
-        logger.info(f'Transcription completed in {round(end - start)}s')
+        logger.info(f'Transcriptions completed in {round(end - start)}s')
 
         if self.transcription_errors:
             logger.error(f'Transcription errors were found. Records have been recorded in the transcription_errors.log file.')
