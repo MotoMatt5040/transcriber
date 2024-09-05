@@ -49,25 +49,28 @@ class Questions(Base):
 class ProjectTranscriptionManager:
     def __init__(self, session):
         self.session = session
+        self._active_projects = None
 
-    def get_active_projects(self):
+    def update_active_projects(self):
         process_mode = or_(ActiveProjects.ProcessMode == i for i in [1, 3, 5])
         project_status = or_(ActiveProjects.ProjectStatus == i for i in [1, 4])
         is_com = not_(ActiveProjects.ProjectID.contains("COM"))
-        active_projects = self.session.query(ActiveProjects).where(and_(process_mode, project_status, is_com)).all()
-        return active_projects
+        self._active_projects = self.session.query(ActiveProjects).where(and_(process_mode, project_status, is_com)).all()
+
+    @property
+    def active_projects(self):
+        return self._active_projects
 
     def projects_to_transcribe(self):
-        active_projects = self.get_active_projects()
-
-        if not active_projects:
+        self.update_active_projects()
+        if not self.active_projects:
             return None
 
-        active_questions_projects_list = or_(Questions.ProjectID == project.ProjectID for project in active_projects)
+        active_questions_projects_list = or_(Questions.ProjectID == project.ProjectID for project in self.active_projects)
         questions = self.session.query(Questions).where(active_questions_projects_list).all()
         questions = self.questions_dict(questions)
 
-        active_detail_projects_list = or_(DetailRecords.ProjectID == project.ProjectID for project in active_projects)
+        active_detail_projects_list = or_(DetailRecords.ProjectID == project.ProjectID for project in self.active_projects)
         result = self.session.query(DetailRecords).where(
             and_(
                 active_detail_projects_list,
