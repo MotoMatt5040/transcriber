@@ -9,7 +9,7 @@ logger = logging.getLogger('log')
 if os.environ['environment'] == 'dev':
     logger.setLevel(logging.DEBUG)
 else:
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.ERROR)
 
 # Console handler
 ch = logging.StreamHandler()
