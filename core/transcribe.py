@@ -238,9 +238,16 @@ class Transcribe:
                     logger.debug(f"File does not exist for: {file_path}")
                     continue
 
-                if get_audio_length(file_path) < 10:
+                audio_length = get_audio_length(file_path)
+
+                if audio_length < 10:
                     item.Transcription = ''
                     logger.warning(f"Audio file is too short: {file_path}")
+                    continue
+
+                if audio_length > 300:
+                    item.Transcription = ''
+                    logger.warning(f"Audio file is too long: {file_path}")
                     continue
 
                 print_progress_bar(i + 1, amount, prefix='Progress:', suffix='Complete', length=50, file_path=file_path)
@@ -315,6 +322,7 @@ class Transcribe:
                 item.Transcription = get_sentence_case(speaker_transcription.strip())
                 session.commit()
                 print_progress_bar(i + 1, amount, prefix='Progress:', suffix='Complete', length=50)
+        session.commit()
         end = time.perf_counter()
         logger.info(f'Transcriptions completed in {round(end - start)}s')
 
