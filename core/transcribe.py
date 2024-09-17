@@ -224,18 +224,23 @@ class Transcribe:
         if result is not None:
             for i, item in enumerate(result):
                 if 'Proof' in item.RecStrID:
+                    logger.debug('proof')
                     continue
 
                 if item.Transcription is not None:
+                    logger.debug('transcription')
                     continue
 
                 if not item.ProjectID:
+                    logger.debug('no project id')
                     continue
 
-                file_path = f"{os.environ['wav_path_begin']}{item.PCMHome}{os.environ['wav_path_end']}/{item.ProjectID}PCM/{item.Question}_{item.SurveyID}.wav"
+                file_path = f"{os.environ['wav_path_begin']}{item.PCMHome}{os.environ['wav_path_end']}{item.ProjectID}PCM/{item.Question}_{item.SurveyID}.wav"
 
                 if not os.path.exists(file_path):
+                    item.Transcription = ''
                     logger.debug(f"File does not exist for: {file_path}")
+                    # print('file does not exist', file_path)
                     continue
 
                 audio_length = get_audio_length(file_path)
@@ -245,7 +250,7 @@ class Transcribe:
                     logger.warning(f"Audio file is too short: {file_path}")
                     continue
 
-                if audio_length > 300:
+                if audio_length > 600:
                     item.Transcription = ''
                     logger.warning(f"Audio file is too long: {file_path}")
                     continue
@@ -324,7 +329,9 @@ class Transcribe:
                 print_progress_bar(i + 1, amount, prefix='Progress:', suffix='Complete', length=50)
         session.commit()
         end = time.perf_counter()
-        logger.info(f'Transcriptions completed in {round(end - start)}s')
+        print()
+        print()
+        print(f'Transcriptions completed in {round(end - start)}s')
 
         if self.transcription_errors:
             logger.error(f'Transcription errors were found. Records have been recorded in the transcription_errors.log file.')
