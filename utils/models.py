@@ -55,31 +55,41 @@ class ProjectTranscriptionManager:
         process_mode = or_(ActiveProjects.ProcessMode == i for i in [1, 3, 5])
         project_status = or_(ActiveProjects.ProjectStatus == i for i in [1, 4])
         is_com = not_(ActiveProjects.ProjectID.contains("COM"))
-        self._active_projects = self.session.query(ActiveProjects).where(and_(process_mode, project_status, is_com)).all()
+        try:
+            self._active_projects = self.session.query(ActiveProjects).where(and_(process_mode, project_status, is_com)).all()
+        except Exception as e:
+            logger.error("Error pulling active projects. Rollback initiated...")
+            session.rollback()
 
     @property
     def active_projects(self):
         return self._active_projects
 
     def projects_to_transcribe(self):
-        self.update_active_projects()
-        if not self.active_projects:
+        try:
+            self.update_active_projects()
+            if not self.active_projects:
+                return None
+
+            active_questions_projects_list = or_(Questions.ProjectID == project.ProjectID for project in self.active_projects)
+            questions = self.session.query(Questions).where(active_questions_projects_list).all()
+            questions = self.questions_dict(questions)
+
+            active_detail_projects_list = or_(DetailRecords.ProjectID == project.ProjectID for project in self.active_projects)
+            result = self.session.query(DetailRecords).where(
+                and_(
+                    active_detail_projects_list,
+                    DetailRecords.PCMHome > 0,
+                    DetailRecords.TypeFlowStatus == 14,
+                    DetailRecords.TypeCode == 0,
+                    DetailRecords.Transcription.is_(None)
+                )).all()
+            return questions, result
+        except Exception as e:
+            logger.error(e)
+            logger.error("Error pulling project data. Rollback initiated...")
+            session.rollback()
             return None
-
-        active_questions_projects_list = or_(Questions.ProjectID == project.ProjectID for project in self.active_projects)
-        questions = self.session.query(Questions).where(active_questions_projects_list).all()
-        questions = self.questions_dict(questions)
-
-        active_detail_projects_list = or_(DetailRecords.ProjectID == project.ProjectID for project in self.active_projects)
-        result = self.session.query(DetailRecords).where(
-            and_(
-                active_detail_projects_list,
-                DetailRecords.PCMHome > 0,
-                DetailRecords.TypeFlowStatus == 14,
-                DetailRecords.TypeCode == 0,
-                DetailRecords.Transcription.is_(None)
-            )).all()
-        return questions, result
 
     def questions_dict(self, questions):
         q = {}
