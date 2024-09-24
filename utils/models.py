@@ -2,6 +2,7 @@ import os
 import logging
 
 from sqlalchemy import create_engine, Column, String, Integer, Date, BigInteger, or_, not_, and_, CHAR, Text
+from sqlalchemy.exc import OperationalError
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm import declarative_base
 from utils.logger_config import logger
@@ -11,7 +12,11 @@ load_dotenv()
 
 
 Base = declarative_base()
-engine = create_engine(os.environ['db_uri'])
+engine = create_engine(
+    os.environ['db_uri'],
+    pool_pre_ping=True,
+    connect_args={"timeout": 30}
+)
 Session = sessionmaker(bind=engine)
 session = Session()
 
@@ -57,6 +62,10 @@ class ProjectTranscriptionManager:
         is_com = not_(ActiveProjects.ProjectID.contains("COM"))
         try:
             self._active_projects = self.session.query(ActiveProjects).where(and_(process_mode, project_status, is_com)).all()
+        except OperationalError as e:
+            logger.error("OperationalError during project data pull. Retrying...")
+            self.session.rollback()  # Rollback in case of connection loss
+            self.update_active_projects()  # Retry the update process
         except Exception as e:
             logger.error("Error pulling active projects. Rollback initiated...")
             session.rollback()
@@ -85,6 +94,10 @@ class ProjectTranscriptionManager:
                     DetailRecords.Transcription.is_(None)
                 )).all()
             return questions, result
+        except OperationalError as e:
+            logger.error("OperationalError during project data pull. Retrying...")
+            self.session.rollback()  # Rollback in case of connection loss
+            self.update_active_projects()  # Retry the update process
         except Exception as e:
             logger.error(e)
             logger.error("Error pulling project data. Rollback initiated...")
