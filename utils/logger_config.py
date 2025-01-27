@@ -9,6 +9,12 @@ logger = logging.getLogger('log')
 
 env = os.environ['environment']
 
+# Root logger
+if env == 'dev':
+    logger.setLevel(logging.DEBUG)
+elif env == 'prod':
+    logger.setLevel(logging.INFO)
+
 # Console handler
 ch = logging.StreamHandler()
 if env == 'dev':
