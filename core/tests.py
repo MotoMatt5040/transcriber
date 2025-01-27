@@ -4,7 +4,6 @@ import whisper
 import time
 import re
 
-from utils.models import ProjectTranscriptionManager, session
 import librosa
 import numpy as np
 import noisereduce as nr
@@ -42,7 +41,8 @@ else:
     # pipeline.to(torch.device('cpu'))
 
 
-ptm = ProjectTranscriptionManager(session)
+model = whisper.load_model("medium", device="cuda")
+model.to(torch.device('cuda'))
 
 
 def print_red(*args):
@@ -59,28 +59,6 @@ def print_light_green(*args):
     # Convert all arguments to string and concatenate them
     message = ' '.join(map(str, args))
     print(f"\033[92m{message}\033[0m")
-
-
-def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, length=100, fill='█', file_path='', print_end=""):
-    """
-    Call in a loop to create terminal progress bar
-    @params:
-        iteration   - Required  : current iteration (Int)
-        total       - Required  : total iterations (Int)
-        prefix      - Optional  : prefix string (Str)
-        suffix      - Optional  : suffix string (Str)
-        decimals    - Optional  : positive number of decimals in percent complete (Int)
-        length      - Optional  : character length of bar (Int)
-        fill        - Optional  : bar fill character (Str)
-        printEnd    - Optional  : end character (e.g. "\r", "\r\n") (Str)
-    """
-    percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
-    filledLength = int(length * iteration // total)
-    bar = fill * filledLength + '-' * (length - filledLength)
-    print(f'\r{prefix} |{bar}| {estimate_time(total, iteration)}s - {iteration}/{total} - {percent}% {suffix} - {file_path}', end=print_end)
-    # Print New Line on Complete
-    if iteration == total:
-        print()
 
 
 def estimate_time(amount: int, iteration: int = 0) -> int:
@@ -156,7 +134,6 @@ def trim_silence(input_file, output_file, silence_thresh=-40, min_silence_len=20
         combined_audio += segment + AudioSegment.silent(duration=500)  # Add a bit of silence between segments
     combined_audio.export(output_file, format='wav')
 
-
 def noise_reduce_audio(input_file, output_file):
     # Load audio with Librosa
     y, sr = librosa.load(input_file, sr=None)
@@ -225,142 +202,82 @@ class Transcribe:
 
     Default load_model is medium if no model is specified
     """
-    def __init__(self, model: str):
-        self._model = whisper.load_model(model, device="cuda")
-        self._model.to(torch.device('cuda'))
+    def __init__(self, model: str = "medium"):
+        self.model = model
         self.transcription_dict = {}
         self.transcription_errors = []
 
     def transcribe(self):
-        # self.transcription_json()
-        res = ptm.projects_to_transcribe()
-        if not res:
-            logger.debug("Projects to transcribe is empty")
-            return
+        file_path = f"audio/Q4OE_0000340508.wav"
 
-        text_removal, result = res
-        amount = len(result)
+        processed_file = preprocess_audio(file_path)
 
-        estimated_time = estimate_time(amount)
+        # Segment the audio based on silence if needed
+        segment_files = segment_audio_by_silence(processed_file)
 
-        if amount == 0:
-            return
-        logger.info(f'Total amount of records to transcribe: {amount}')
-        logger.info(f'Estimated time to complete: {estimated_time}s')
-        time.sleep(0.1)
-        start = time.perf_counter()
-        print_progress_bar(0, amount, prefix='Progress:', suffix='Complete', length=50)
-        if result is not None:
-            for i, item in enumerate(result):
-                if 'Proof' in item.RecStrID:
-                    logger.debug('proof')
-                    continue
+        # Transcribe each segment
+        full_transcription = ""
+        temp = []
+        speaker_transcription = ''
+        current_sentence = ''
 
-                if item.Transcription is not None:
-                    logger.debug('transcription')
-                    continue
+        interviewer = None
+        # TODO fix repeats using 12926 Q20_1OE 0000044033
+        for segment_file in segment_files:
+            # Perform diarization again on the segment if necessary
+            diarization = pipeline(segment_file, min_speakers=2, max_speakers=2)
+            segment_transcriptions = []
+            prev_speaker = None
+            for turn, _, speaker in diarization.itertracks(yield_label=True):
+                audio_segment_path = f"_segment_{turn.start}_{turn.end}.wav"
+                extract_segment(segment_file, turn.start, turn.end, audio_segment_path)
 
-                if not item.ProjectID:
-                    logger.debug('no project id')
-                    continue
+                # Transcribe the audio segment
+                segment_transcription = model.transcribe(audio_segment_path, language='en')
+                if not prev_speaker:
+                    prev_speaker = speaker
+                    segment_transcriptions.append(f"{speaker}: {segment_transcription['text']}")
+                    current_sentence += f"{speaker}: {segment_transcription['text']}"
+                else:
+                    if prev_speaker == speaker:
+                        segment_transcriptions.append(segment_transcription['text'])
+                        current_sentence += segment_transcription['text']
+                    else:
+                        prev_speaker = speaker
+                        segment_transcriptions.append(f"{speaker}: {segment_transcription['text']}")
+                        current_sentence = f"{speaker}: {segment_transcription['text']}"
 
-                file_path = f"{os.environ['wav_path_begin']}{item.PCMHome}{os.environ['wav_path_end']}{item.ProjectID}PCM/{item.Question}_{item.SurveyID}.wav"
+                os.remove(audio_segment_path)
 
-                if not os.path.exists(file_path):
-                    item.Transcription = ''
-                    logger.debug(f"File does not exist for: {file_path}")
-                    # print('file does not exist', file_path)
-                    continue
-
-                audio_length = get_audio_length(file_path)
-
-                if audio_length < 10:
-                    item.Transcription = ''
-                    logger.warning(f"Audio file is too short: {file_path}")
-                    continue
-
-                if audio_length > 600:
-                    item.Transcription = ''
-                    logger.warning(f"Audio file is too long: {file_path}")
-                    continue
-
-                print_progress_bar(i + 1, amount, prefix='Progress:', suffix='Complete', length=50, file_path=file_path)
-
-                processed_file = preprocess_audio(file_path)
-
-                # Segment the audio based on silence if needed
-                segment_files = segment_audio_by_silence(processed_file)
-
-                # Transcribe each segment
-                full_transcription = ""
-                temp = []
-                speaker_transcription = ''
-                current_sentence = ''
-
-                interviewer = None
-                # TODO fix repeats using 12926 Q20_1OE 0000044033
-                for segment_file in segment_files:
-                    # Perform diarization again on the segment if necessary
-                    diarization = pipeline(segment_file, min_speakers=2, max_speakers=2)
-                    segment_transcriptions = []
-                    prev_speaker = None
-                    for turn, _, speaker in diarization.itertracks(yield_label=True):
-                        audio_segment_path = f"_segment_{turn.start}_{turn.end}.wav"
-                        extract_segment(segment_file, turn.start, turn.end, audio_segment_path)
-
-                        # Transcribe the audio segment
-                        segment_transcription = self.model.transcribe(audio_segment_path, language='en')
-                        if not prev_speaker:
-                            prev_speaker = speaker
-                            segment_transcriptions.append(f"{speaker}: {segment_transcription['text']}")
-                            current_sentence += f"{speaker}: {segment_transcription['text']}"
-                        else:
-                            if prev_speaker == speaker:
-                                segment_transcriptions.append(segment_transcription['text'])
-                                current_sentence += segment_transcription['text']
-                            else:
-                                prev_speaker = speaker
-                                segment_transcriptions.append(f"{speaker}: {segment_transcription['text']}")
-                                current_sentence = f"{speaker}: {segment_transcription['text']}"
-
-                        # Delete the temporary segment file after transcription
-                        os.remove(audio_segment_path)
-
-                        th = TextHandler(segment_transcription['text'], text_removal[item.Question])
-                        match = 0
-
-                        if not interviewer:
-                            for t in th.question:
-                                if t in current_sentence:
-                                    match += 1
-                            p_match = match * 100 / len(th.question)
-                            if p_match > 75:
-                                interviewer = speaker
-                            continue
-
-                        if interviewer == "SPEAKER_00":
-                            respondent = "SPEAKER_01"
-                        else:
-                            respondent = "SPEAKER_00"
-
-                        if speaker == respondent:
-                            speaker_transcription += segment_transcription['text']
-
-                    full_transcription += " ".join(segment_transcriptions) + " "
-                    temp.append(segment_transcriptions)
+                th = TextHandler(segment_transcription['text'])
+                match = 0
 
                 if not interviewer:
-                    # logger.warning(f"Interviewer not found: {item.ProjectID} - {item.Question} - {item.SurveyID} - {file_path}")
-                    speaker_transcription = self.model.transcribe(file_path, language='en')['text']
+                    for t in th.question:
+                        if t in current_sentence:
+                            match += 1
+                    p_match = match * 100 / len(th.question)
+                    if p_match > 75:
+                        interviewer = speaker
+                    continue
 
-                item.Transcription = get_sentence_case(speaker_transcription.strip())
-                session.commit()
-                print_progress_bar(i + 1, amount, prefix='Progress:', suffix='Complete', length=50, file_path=file_path)
-        session.commit()
-        end = time.perf_counter()
-        print()
-        print()
-        print(f'Transcriptions completed in {round(end - start)}s')
+                if interviewer == "SPEAKER_00":
+                    respondent = "SPEAKER_01"
+                else:
+                    respondent = "SPEAKER_00"
+
+                if speaker == respondent:
+                    speaker_transcription += segment_transcription['text']
+
+            full_transcription += " ".join(segment_transcriptions) + " "
+            temp.append(segment_transcriptions)
+
+        if not interviewer:
+            speaker_transcription = model.transcribe(file_path, language='en')['text']
+
+        transcription = get_sentence_case(speaker_transcription.strip())
+
+        print(transcription)
 
         if self.transcription_errors:
             logger.error(f'Transcription errors were found. Records have been recorded in the transcription_errors.log file.')
@@ -375,12 +292,14 @@ class Transcribe:
     def model(self, m):
         self._model = whisper.load_model(m)
 
+
 class TextHandler:
 
-    def __init__(self, text, text_removal):
+    def __init__(self, text, text_removal=None):
         self.text = text
-        self.question = text_removal['text'].lower()
-        self.probe = text_removal['probe'].lower()
+        if text_removal:
+            self.question = text_removal['text'].lower()
+            self.probe = text_removal['probe'].lower()
 
     @property
     def text(self) -> str:
@@ -407,3 +326,5 @@ class TextHandler:
     @probe.setter
     def probe(self, p: str):
         self._probe = clean_text(p)
+
+Transcribe.transcribe()
