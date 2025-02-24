@@ -74,7 +74,7 @@ class ProjectTranscriptionManager:
     def active_projects(self):
         return self._active_projects
 
-    def projects_to_transcribe(self):
+    def projects_to_transcribe(self, retries: int = 0):
         try:
             self.update_active_projects()
             if not self.active_projects:
@@ -85,6 +85,7 @@ class ProjectTranscriptionManager:
             questions = self.questions_dict(questions)
 
             active_detail_projects_list = or_(DetailRecords.ProjectID == project.ProjectID for project in self.active_projects)
+
             result = self.session.query(DetailRecords).where(
                 and_(
                     active_detail_projects_list,
@@ -100,14 +101,31 @@ class ProjectTranscriptionManager:
             self.update_active_projects()  # Retry the update process
         except Exception as e:
             logger.error(e)
-            logger.error("Error pulling project data. Rollback initiated...")
+            logger.warning("Error pulling project data. Rollback initiated...")
             session.rollback()
-            return None
+            if retries < 5:
+                logger.warning(f"Retrying... Attempt {retries + 1}")
+                self.projects_to_transcribe(retries + 1)
+            else:
+                logger.critical("Max retries reached. Exiting...")
+
+                quit()
+        return []
 
     def questions_dict(self, questions):
+        if not questions:
+            logger.error("No questions found")
+            return {}
         q = {}
+
         for question in questions:
             text: list = question.QText.split('\n')
-
-            q[question.OENum] = {'text': text[0], 'probe': text[4]}
+            try:
+                q[question.OENum] = {'text': text[0], 'probe': text[4]}
+            except IndexError as e:
+                logger.warning(f"{e} - Error creating dictionary for question {question.OENum}: {question.QText}")
+                q[question.OENum] = {'text': None, 'probe': None}
+            except Exception as e:
+                logger.error(f"{e} - Error creating dictionary for question {question.OENum}: {question.QText}")
+                logger.error("Error creating questions dictionary")
         return q

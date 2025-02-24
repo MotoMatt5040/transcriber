@@ -20,7 +20,7 @@ ch = logging.StreamHandler()
 if env == 'dev':
     ch.setLevel(logging.DEBUG)
 elif env == 'prod':
-    ch.setLevel(logging.ERROR)
+    ch.setLevel(logging.WARNING)
 ch.setFormatter(CustomFormatter())
 logger.addHandler(ch)
 
