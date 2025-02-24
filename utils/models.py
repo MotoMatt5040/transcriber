@@ -124,7 +124,7 @@ class ProjectTranscriptionManager:
                 q[question.OENum] = {'text': text[0], 'probe': text[4]}
             except IndexError as e:
                 logger.warning(f"{e} - Error creating dictionary for question {question.OENum}: {question.QText}")
-                q[question.OENum] = {'text': None, 'probe': None}
+                q[question.OENum] = {'text': '', 'probe': ''}
             except Exception as e:
                 logger.error(f"{e} - Error creating dictionary for question {question.OENum}: {question.QText}")
                 logger.error("Error creating questions dictionary")
