@@ -91,7 +91,7 @@ pip install openai-whisper pyodbc sqlalchemy python-dotenv pydub pyannote.audio
 ## conda:
 ```bash
 conda install pyodbc sqlalchemy
-pip install openai-whisper python-dotenv pydub pyannote.audio
+pip install openai-whisper python-dotenv pydub pyannote.audio librosa noisereduce
 ```
 ##
 
