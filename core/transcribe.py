@@ -241,6 +241,8 @@ class Transcribe:
         text_removal, result = res
         amount = len(result)
 
+        # logger.debug(result)
+
         estimated_time = estimate_time(amount)
 
         if amount == 0:
@@ -279,7 +281,7 @@ class Transcribe:
                     logger.warning(f"Audio file is too short: {file_path}")
                     continue
 
-                if audio_length > 600:
+                if audio_length > 99600:
                     item.Transcription = ''
                     logger.warning(f"Audio file is too long: {file_path}")
                     continue
@@ -354,8 +356,15 @@ class Transcribe:
                     speaker_transcription = self.model.transcribe(file_path, language='en')['text']
 
                 item.Transcription = get_sentence_case(speaker_transcription.strip())
-                session.commit()
-                print_progress_bar(i + 1, amount, prefix='Progress:', suffix='Complete', length=50, file_path=file_path)
+                # with open(f"{item.ProjectID} {item.Question} {item.SurveyID}.txt", 'w', encoding='utf-8') as f:
+                #     f.write(item.Transcription)
+                try:
+                    session.commit()
+                except Exception as e:
+                    import date
+                    with open(f"{date.today()}/{item.ProjectID}/{item.Question}/{item.SurveyID}.txt", 'w', encoding='utf-8') as f:
+                        f.write(item.Transcription)
+                # print_progress_bar(i + 1, amount, prefix='Progress:', suffix='Complete', length=50, file_path=file_path)
         session.commit()
         end = time.perf_counter()
         print()

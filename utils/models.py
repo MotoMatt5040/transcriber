@@ -49,6 +49,7 @@ class Questions(Base):
     ProjectID = Column(String(50))
     OENum = Column(String(50))
     QText = Column(Text)
+    Active = Column(Integer)
 
 
 class ProjectTranscriptionManager:
@@ -78,22 +79,48 @@ class ProjectTranscriptionManager:
         try:
             self.update_active_projects()
             if not self.active_projects:
+                logger.debug("No active projects found.")
                 return None
 
             active_questions_projects_list = or_(Questions.ProjectID == project.ProjectID for project in self.active_projects)
-            questions = self.session.query(Questions).where(active_questions_projects_list).all()
+            active_questions_query = and_(Questions.Active == 1, active_questions_projects_list)
+            questions = self.session.query(Questions).where(active_questions_query).all()
             questions = self.questions_dict(questions)
 
             active_detail_projects_list = or_(DetailRecords.ProjectID == project.ProjectID for project in self.active_projects)
 
-            result = self.session.query(DetailRecords).where(
+            # result = self.session.query(DetailRecords).where(
+            #     and_(
+            #         active_detail_projects_list,
+            #         DetailRecords.PCMHome > 0,
+            #         DetailRecords.TypeFlowStatus == 14,
+            #         DetailRecords.TypeCode == 0,
+            #         DetailRecords.Transcription.is_(None)
+            #     )).all()
+
+            query = self.session.query(DetailRecords).join(
+                Questions,
+                and_(DetailRecords.ProjectID == Questions.ProjectID, DetailRecords.Question == Questions.OENum),
+            ).where(
                 and_(
                     active_detail_projects_list,
                     DetailRecords.PCMHome > 0,
                     DetailRecords.TypeFlowStatus == 14,
                     DetailRecords.TypeCode == 0,
-                    DetailRecords.Transcription.is_(None)
-                )).all()
+                    or_(
+                        DetailRecords.Transcription.is_(None),
+                        DetailRecords.Transcription == ''
+                    ),
+                    Questions.Active == 1
+                ))
+
+            logger.info(f"SQL Query: {query.statement.compile(compile_kwargs={'literal_binds': True})}")
+
+            result = query.all()
+            for q in result:
+                logger.debug(q.Question)
+            # for q in questions:
+            #     logger.debug(q)
             return questions, result
         except OperationalError as e:
             logger.error("OperationalError during project data pull. Retrying...")
