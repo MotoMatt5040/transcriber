@@ -6,8 +6,6 @@ load_dotenv()
 
 import argparse
 import time
-import logging
-from logging.handlers import TimedRotatingFileHandler
 import traceback
 import sys
 
@@ -23,7 +21,6 @@ args = parser.parse_args()
 
 
 if os.environ.get('environment') == 'test':
-    print('here')
     from core.tests import Transcribe
     t = Transcribe(model=args.model)
     t.transcribe()
@@ -34,7 +31,7 @@ if os.environ.get('environment') == 'test':
 
 t = Transcribe(model=args.model)
 while True:
-    sleep_time_in_minutes = 5
+    sleep_time_in_minutes = args.sleep
     try:
         t.transcribe()
     except Exception as e:
