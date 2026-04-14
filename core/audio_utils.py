@@ -86,8 +86,10 @@ def resample_audio(audio, target_sample_rate=16000):
 
 
 def trim_silence_audio(audio, silence_thresh=-40, min_silence_len=2000):
-    """Trim silence from an AudioSegment in memory."""
+    """Trim silence from an AudioSegment in memory. Returns original audio if no segments found."""
     trimmed_segments = split_on_silence(audio, silence_thresh=silence_thresh, min_silence_len=min_silence_len)
+    if not trimmed_segments:
+        return audio
     combined = AudioSegment.silent(duration=0)
     for segment in trimmed_segments:
         combined += segment + AudioSegment.silent(duration=500)
