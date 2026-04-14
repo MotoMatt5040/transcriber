@@ -1,3 +1,32 @@
+# IDE
 *.iml
 *.xml
-*.idea
+.idea/
+
+# Audio files
+*.wav
+
+# Environment
+.env
+venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Build artifacts
+build/
+dist/
+*.spec
+*.egg-info/
+
+# Logs
+logs/
+
+# Archives
+*.zip
+
+# Temp preprocessing files
+_processed.wav
+_segment_*.wav
