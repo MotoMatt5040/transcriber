@@ -1,5 +1,4 @@
 import os
-import logging
 
 from sqlalchemy import create_engine, Column, String, Integer, Date, BigInteger, or_, not_, and_, CHAR, Text
 from sqlalchemy.exc import OperationalError
@@ -58,18 +57,22 @@ class ProjectTranscriptionManager:
         self._active_projects = None
 
     def update_active_projects(self):
-        process_mode = or_(ActiveProjects.ProcessMode == i for i in [1, 3, 5])
-        project_status = or_(ActiveProjects.ProjectStatus == i for i in [1, 4])
         is_com = not_(ActiveProjects.ProjectID.contains("COM"))
         try:
-            self._active_projects = self.session.query(ActiveProjects).where(and_(process_mode, project_status, is_com)).all()
+            self._active_projects = self.session.query(ActiveProjects).where(
+                and_(
+                    ActiveProjects.ProcessMode.in_([1, 3, 5]),
+                    ActiveProjects.ProjectStatus.in_([1, 4]),
+                    is_com,
+                )
+            ).all()
         except OperationalError as e:
             logger.error("OperationalError during project data pull. Retrying...")
-            self.session.rollback()  # Rollback in case of connection loss
-            self.update_active_projects()  # Retry the update process
+            self.session.rollback()
+            self.update_active_projects()
         except Exception as e:
             logger.error("Error pulling active projects. Rollback initiated...")
-            session.rollback()
+            self.session.rollback()
 
     @property
     def active_projects(self):
@@ -82,12 +85,13 @@ class ProjectTranscriptionManager:
                 logger.debug("No active projects found.")
                 return None
 
-            active_questions_projects_list = or_(Questions.ProjectID == project.ProjectID for project in self.active_projects)
-            active_questions_query = and_(Questions.Active == 1, active_questions_projects_list)
+            active_project_ids = [project.ProjectID for project in self.active_projects]
+
+            active_questions_query = and_(Questions.Active == 1, Questions.ProjectID.in_(active_project_ids))
             questions = self.session.query(Questions).where(active_questions_query).all()
             questions = self.questions_dict(questions)
 
-            active_detail_projects_list = or_(DetailRecords.ProjectID == project.ProjectID for project in self.active_projects)
+            active_detail_projects_list = DetailRecords.ProjectID.in_(active_project_ids)
 
             # result = self.session.query(DetailRecords).where(
             #     and_(
@@ -129,7 +133,7 @@ class ProjectTranscriptionManager:
         except Exception as e:
             logger.error(e)
             logger.warning("Error pulling project data. Rollback initiated...")
-            session.rollback()
+            self.session.rollback()
             if retries < 5:
                 logger.warning(f"Retrying... Attempt {retries + 1}")
                 self.projects_to_transcribe(retries + 1)
