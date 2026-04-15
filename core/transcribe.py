@@ -47,7 +47,9 @@ def print_progress_bar(iteration, total, prefix='', suffix='', decimals=1, lengt
     percent = ("{0:." + str(decimals) + "f}").format(100 * (iteration / float(total)))
     filledLength = int(length * iteration // total)
     bar = fill * filledLength + '-' * (length - filledLength)
-    print(f'\r{prefix} |{bar}| {estimate_time(total, iteration, cuda_device_name)}s - {iteration}/{total} - {percent}% {suffix} - {file_path}', end=print_end)
+    est = estimate_time(total, iteration, cuda_device_name)
+    print(f'\r{prefix} |{bar}| {est}s - {iteration}/{total} - {percent}% {suffix} - {file_path}', end=print_end)
+    logger.info(f"{prefix} {iteration}/{total} - {percent}% - ~{est}s remaining - {file_path}")
     if iteration == total:
         print()
 
@@ -222,8 +224,10 @@ class Transcribe:
             session.rollback()
 
         end = time.perf_counter()
+        elapsed = round(end - start)
         print()
-        print(f'Transcriptions completed in {round(end - start)}s')
+        print(f'Transcriptions completed in {elapsed}s')
+        logger.info(f'Transcriptions completed: {amount} records in {elapsed}s')
 
     @property
     def model(self):
