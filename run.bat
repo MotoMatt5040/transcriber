@@ -9,7 +9,7 @@ cd /d "%~dp0"
 ECHO ============================
 ECHO Conda Activate
 ECHO ============================
-@CALL "%LOCALAPPDATA%\anaconda3\Scripts\activate.bat" transcription_dev
+@CALL "%LOCALAPPDATA%\anaconda3\Scripts\activate.bat" transcription
 
 :: Section 2: Execute python script.
 ECHO ============================

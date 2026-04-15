@@ -22,7 +22,7 @@ jobs:
       - name: Install/update dependencies
         shell: cmd
         run: |
-          C:\Users\matt.w\AppData\Local\anaconda3\envs\transcription_dev\python.exe -m pip install -r requirements.txt
+          C:\Users\matt.w\AppData\Local\anaconda3\envs\transcription\python.exe -m pip install -r requirements.txt
 
       - name: Start transcriber
         shell: cmd
