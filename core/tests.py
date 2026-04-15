@@ -10,7 +10,7 @@ from core.audio_utils import (
     preprocess_audio, get_sentence_case,
 )
 
-pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.1", use_auth_token=os.environ['hugging_face_token'])
+pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-community-1", token=os.environ['HUGGING_FACE_TOKEN'])
 
 cuda_is_available = torch.cuda.is_available()
 cuda_device_name = None

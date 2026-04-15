@@ -13,7 +13,7 @@ from core.audio_utils import (
     get_audio_length, get_sentence_case, cleanup_temp_files,
 )
 
-pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-3.1", use_auth_token=os.environ['hugging_face_token'])
+pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-community-1", token=os.environ['HUGGING_FACE_TOKEN'])
 
 # TODO Test with Q17OE 12948 12751
 
@@ -132,7 +132,7 @@ class Transcribe:
                     logger.debug('no project id')
                     continue
 
-                file_path = f"{os.environ['wav_path_begin']}{item.PCMHome}{os.environ['wav_path_end']}{item.ProjectID}PCM/{item.Question}_{item.SurveyID}.wav"
+                file_path = f"{os.environ['WAV_PATH_BEGIN']}{item.PCMHome}{os.environ['WAV_PATH_END']}{item.ProjectID}PCM/{item.Question}_{item.SurveyID}.wav"
                 logger.debug(f"Processing: {file_path}")
 
                 if not os.path.exists(file_path):
