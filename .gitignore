@@ -27,6 +27,8 @@ logs/
 # Archives
 *.zip
 
+tests/
+
 # Temp preprocessing files
 _processed.wav
 _segment_*.wav
