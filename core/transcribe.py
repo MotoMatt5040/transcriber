@@ -9,8 +9,8 @@ from pyannote.audio import Pipeline
 from utils.logger_config import logger
 from core.audio_utils import (
     estimate_time, clean_text, extract_segment,
-    segment_audio_by_silence, preprocess_audio,
-    get_audio_length, get_sentence_case, cleanup_temp_files,
+    preprocess_audio, get_audio_length, get_sentence_case,
+    cleanup_temp_files,
 )
 
 pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization-community-1", token=os.environ['HUGGING_FACE_TOKEN'])
@@ -159,65 +159,46 @@ class Transcribe:
                     processed_file = preprocess_audio(file_path)
                     temp_files.append(processed_file)
 
-                    segment_files = segment_audio_by_silence(processed_file)
-                    temp_files.extend(segment_files)
+                    diarization = pipeline(processed_file, min_speakers=2, max_speakers=2)
 
-                    full_transcription = ""
-                    temp = []
                     speaker_transcription = ''
                     current_sentence = ''
+                    all_transcriptions = []
 
                     interviewer = None
+                    respondent = None
+                    prev_speaker = None
                     # TODO fix repeats using 12926 Q20_1OE 0000044033
-                    for segment_file in segment_files:
-                        diarization = pipeline(segment_file, min_speakers=2, max_speakers=2)
-                        segment_transcriptions = []
-                        prev_speaker = None
-                        for turn, _, speaker in diarization.itertracks(yield_label=True):
-                            audio_segment_path = f"_segment_{turn.start}_{turn.end}.wav"
-                            extract_segment(segment_file, turn.start, turn.end, audio_segment_path)
+                    for turn, _, speaker in diarization.itertracks(yield_label=True):
+                        audio_segment_path = f"_segment_{turn.start}_{turn.end}.wav"
+                        extract_segment(processed_file, turn.start, turn.end, audio_segment_path)
 
-                            segment_transcription = self.model.transcribe(audio_segment_path, language='en')
-                            if not prev_speaker:
-                                prev_speaker = speaker
-                                segment_transcriptions.append(f"{speaker}: {segment_transcription['text']}")
-                                current_sentence += f"{speaker}: {segment_transcription['text']}"
-                            else:
-                                if prev_speaker == speaker:
-                                    segment_transcriptions.append(segment_transcription['text'])
-                                    current_sentence += segment_transcription['text']
-                                else:
-                                    prev_speaker = speaker
-                                    segment_transcriptions.append(f"{speaker}: {segment_transcription['text']}")
-                                    current_sentence = f"{speaker}: {segment_transcription['text']}"
+                        segment_transcription = self.model.transcribe(audio_segment_path, language='en')
+                        text = segment_transcription['text']
+                        os.remove(audio_segment_path)
 
-                            os.remove(audio_segment_path)
+                        if not prev_speaker or prev_speaker != speaker:
+                            current_sentence = f"{speaker}: {text}"
+                            prev_speaker = speaker
+                        else:
+                            current_sentence += text
 
-                            th = TextHandler(segment_transcription['text'], text_removal[item.Question])
-                            match = 0
+                        all_transcriptions.append(text)
 
-                            if not interviewer:
-                                for t in th.question:
-                                    if t in current_sentence:
-                                        match += 1
-                                p_match = match * 100 / len(th.question)
-                                if p_match > 75:
-                                    interviewer = speaker
-                                continue
+                        if not interviewer:
+                            th = TextHandler(text, text_removal[item.Question])
+                            match = sum(1 for t in th.question if t in current_sentence)
+                            p_match = match * 100 / len(th.question)
+                            if p_match > 75:
+                                interviewer = speaker
+                                respondent = "SPEAKER_01" if interviewer == "SPEAKER_00" else "SPEAKER_00"
+                            continue
 
-                            if interviewer == "SPEAKER_00":
-                                respondent = "SPEAKER_01"
-                            else:
-                                respondent = "SPEAKER_00"
-
-                            if speaker == respondent:
-                                speaker_transcription += segment_transcription['text']
-
-                        full_transcription += " ".join(segment_transcriptions) + " "
-                        temp.append(segment_transcriptions)
+                        if speaker == respondent:
+                            speaker_transcription += text
 
                     if not interviewer:
-                        speaker_transcription = self.model.transcribe(file_path, language='en')['text']
+                        speaker_transcription = ' '.join(all_transcriptions)
 
                     item.Transcription = get_sentence_case(speaker_transcription.strip())
                     logger.info(f"Transcribed: {item.ProjectID}/{item.Question}/{item.SurveyID}")
