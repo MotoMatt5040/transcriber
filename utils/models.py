@@ -12,7 +12,7 @@ load_dotenv()
 
 Base = declarative_base()
 engine = create_engine(
-    os.environ['db_uri'],
+    os.environ['DB_URI'],
     pool_pre_ping=True,
     connect_args={"timeout": 30}
 )

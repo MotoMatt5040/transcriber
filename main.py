@@ -20,7 +20,7 @@ parser.add_argument('--sleep', type=int, default=5, help='Sleep duration in minu
 args = parser.parse_args()
 
 
-if os.environ.get('environment') == 'test':
+if os.environ.get('ENVIRONMENT') == 'test':
     from core.tests import Transcribe
     t = Transcribe(model=args.model)
     t.transcribe()

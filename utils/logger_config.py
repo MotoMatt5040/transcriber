@@ -7,19 +7,19 @@ import os
 # Set up the main logger
 logger = logging.getLogger('log')
 
-env = os.environ['environment']
+env = os.environ['ENVIRONMENT']
 
 # Root logger
 if env == 'dev':
     logger.setLevel(logging.DEBUG)
-elif env == 'prod':
+elif env in ('prod', 'production'):
     logger.setLevel(logging.INFO)
 
 # Console handler
 ch = logging.StreamHandler()
 if env == 'dev':
     ch.setLevel(logging.DEBUG)
-elif env == 'prod':
+elif env in ('prod', 'production'):
     ch.setLevel(logging.WARNING)
 ch.setFormatter(CustomFormatter())
 logger.addHandler(ch)
@@ -28,7 +28,7 @@ logger.addHandler(ch)
 fh = TimedRotatingFileHandler('logs/logs.log', when='W0', interval=1, backupCount=3)
 if env == 'dev':
     fh.setLevel(logging.WARNING)
-elif env == 'prod':
+elif env in ('prod', 'production'):
     fh.setLevel(logging.INFO)
 plain_formatter = logging.Formatter("%(asctime)s - %(name)s - %(filename)s - %(levelname)s - Line: %(lineno)d - %(message)s")
 fh.setFormatter(plain_formatter)
